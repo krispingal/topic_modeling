@@ -4,7 +4,8 @@ Readme
 [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://opensource.org/licenses/MIT)
 
 This repository contains my attempts at topic modelling using [gensim][gensim] which is an open source python 
-library for topic modelling. Firstly I am trying it out on the [20 newsgroup][20_newsgroup] dataset.
+library for topic modelling. Firstly I am trying it out on the [20 newsgroup][20_newsgroup] dataset which is a collection 
+of 20000 messages/mails from 20 newsgroups.
 
 
 [gensim]: https://radimrehurek.com/gensim/index.html
