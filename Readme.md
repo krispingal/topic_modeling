@@ -34,33 +34,21 @@ I have benchmarked gensim LDA on this corpus, which can be viewed [here][lda_ben
 
 I get the following top 20 words as output while running LDA on 20-newsgroups for 6 topics.
 
-Topic id # 0
-['cunyvm', 'foxvog', 'vtt', 'huston', 'tko', 'dfo', 'waldrop', 'tesrt', 'tufts', 'announcing', 'fusi', 'nis', 'chuvashia', 'inguiry', 'eridan', 'daruwala', 'vrrend', 'ich', 'harvested', 'jade']
-Topic id # 1
-['maine', 'sfu', 'callison', 'oehler', 'bcci', 'dta', 'mattias', 'bobc', 'rauser', 'camosun', 'krzysztof', 'captain', 'albany', 'maynard', 'cbda', 'apgea', 'oasys', 'cuesta', 'lockridge', 'mydisplay']
-Topic id # 2
-['_', 'would', 'card', 'people', 'x', 'one', 'government', 'c', 'get', 'like', 'know', 'please', 'article', 'thanks', 'use', 'think', 'anyone', 'drive', 'writes', 'also']
-Topic id # 3
-['russotto', 'jpeg', 'gsh', 'slac', 'hennessy', 'jb', 'bigboote', 'victor', 'scodal', 'shearson', 'usl', 'wam', 'charlottesville', 'higgins', 'nswc', 'intercon', 'oo', 'srl', 'slacvm', 'ucf']
-Topic id # 4
-['truelove', 'leftover', 'mpr', 'inescn', 'hess', 'porto', 'kwansik', 'turkey', 'tracy', 'pom', 'sandia', 'casserole', 'tlu', 'gic', 'ming', 'christmas', 'sylvain', 'chalmers', 'mgp', 'unh']
-Topic id # 5
-['windows', 'graphics', 'scsi', 'ide', 'files', 'x', 'dos', 'controller', 'thanks', 'drive', 'batf', 'fbi', 'file', 'program', 'disk', 'images', 'bus', 'pc', 'format', 'ram']
+1. Topic id # 0 ['cunyvm', 'foxvog', 'vtt', 'huston', 'tko', 'dfo', 'waldrop', 'tesrt', 'tufts', 'announcing', 'fusi', 'nis', 'chuvashia', 'inguiry', 'eridan', 'daruwala', 'vrrend', 'ich', 'harvested', 'jade']
+2. Topic id # 1 ['maine', 'sfu', 'callison', 'oehler', 'bcci', 'dta', 'mattias', 'bobc', 'rauser', 'camosun', 'krzysztof', 'captain', 'albany', 'maynard', 'cbda', 'apgea', 'oasys', 'cuesta', 'lockridge', 'mydisplay']
+3. Topic id # 2 ['_', 'would', 'card', 'people', 'x', 'one', 'government', 'c', 'get', 'like', 'know', 'please', 'article', 'thanks', 'use', 'think', 'anyone', 'drive', 'writes', 'also']
+4. Topic id # 3 ['russotto', 'jpeg', 'gsh', 'slac', 'hennessy', 'jb', 'bigboote', 'victor', 'scodal', 'shearson', 'usl', 'wam', 'charlottesville', 'higgins', 'nswc', 'intercon', 'oo', 'srl', 'slacvm', 'ucf']
+5. Topic id # 4 ['truelove', 'leftover', 'mpr', 'inescn', 'hess', 'porto', 'kwansik', 'turkey', 'tracy', 'pom', 'sandia', 'casserole', 'tlu', 'gic', 'ming', 'christmas', 'sylvain', 'chalmers', 'mgp', 'unh']
+6. Topic id # 5 ['windows', 'graphics', 'scsi', 'ide', 'files', 'x', 'dos', 'controller', 'thanks', 'drive', 'batf', 'fbi', 'file', 'program', 'disk', 'images', 'bus', 'pc', 'format', 'ram']
 
 I get the following top 20 words as output while running HDP, the non prameterised version of LDA, on 20-newsgroups for 6 topics.
 
-Topic id # 0
-['would', 'one', 'people', 'x', 'like', 'know', 'get', 'c', 'think', 'god', 'article', 'writes', 'use', '_', 'apr', 'time', 'also', 'could', 'anyone', 'new']
-Topic id # 1
-['x', 'would', 'windows', 'one', 'know', 'thanks', 'drive', 'c', 'get', 'like', 'anyone', 'people', 'use', 'article', 'please', 'writes', 'apr', 'card', 'cs', '_']
-Topic id # 2
-['god', 'morality', 'cobb', 'would', 'uiuc', 'lis', 'know', 'thanks', 'one', 'anyone', 'get', 'could', 'think', 'ico', 'writes', 'objective', 'system', 'x', 'like', 'someone']
-Topic id # 3
-['religion', 'x', 'rb', '_', 'qur', 'cookson', 'thanks', 'mitre', 'god', 'switch', 'islam', 'engr', 'posting', 'timessqr', 'know', 'latech', 'get', 'bike', 'c', 'low']
-Topic id # 4
-['mabe', 'lars_jorgensen', 'sex', 'new', 'bmug', 'way', 'black', 'monash', 'bike', 'please', 'war', 'gregg', 'would', 'uk', 'audibly', 'writes', 'jaeger', 'clutch', 'book', 'opinions']
-Topic id # 5
-['objective', 'horizon', 'atheism', 'black', 'would', 'event', 'writes', 'values', 'moral', 'mathew', 'mantis', 'frank', 'reality', 'could', 'thanks', 'look', 'minar', 'milwaukeeans', 'send', 'itsmail']
+1. Topic id # 0 ['would', 'one', 'people', 'x', 'like', 'know', 'get', 'c', 'think', 'god', 'article', 'writes', 'use', '_', 'apr', 'time', 'also', 'could', 'anyone', 'new']
+2. Topic id # 1 ['x', 'would', 'windows', 'one', 'know', 'thanks', 'drive', 'c', 'get', 'like', 'anyone', 'people', 'use', 'article', 'please', 'writes', 'apr', 'card', 'cs', '_']
+3. Topic id # 2 ['god', 'morality', 'cobb', 'would', 'uiuc', 'lis', 'know', 'thanks', 'one', 'anyone', 'get', 'could', 'think', 'ico', 'writes', 'objective', 'system', 'x', 'like', 'someone']
+4. Topic id # 3 ['religion', 'x', 'rb', '_', 'qur', 'cookson', 'thanks', 'mitre', 'god', 'switch', 'islam', 'engr', 'posting', 'timessqr', 'know', 'latech', 'get', 'bike', 'c', 'low']
+5. Topic id # 4 ['mabe', 'lars_jorgensen', 'sex', 'new', 'bmug', 'way', 'black', 'monash', 'bike', 'please', 'war', 'gregg', 'would', 'uk', 'audibly', 'writes', 'jaeger', 'clutch', 'book', 'opinions']
+6. Topic id # 5 ['objective', 'horizon', 'atheism', 'black', 'would', 'event', 'writes', 'values', 'moral', 'mathew', 'mantis', 'frank', 'reality', 'could', 'thanks', 'look', 'minar', 'milwaukeeans', 'send', 'itsmail']
 
 There are a few things that I've observed about gensim's LDA behavior
 
