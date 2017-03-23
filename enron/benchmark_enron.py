@@ -35,38 +35,55 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def setup_output_files(args, OUT_DIR):
+def cleanup_output_files(args, num_passes, OUT_DIR):
     perf_out = None
     topic_out = None
     if args.disable_timing == False:
         perf_out = open(os.path.join(OUT_DIR, perf_out_file), 'w+')
+        #Print column header
+        print("num_topics, iterations, workers, tf-idf", end='', file=perf_out)
+        for i in xrange(num_passes):
+            print(", pass_{0}".format(i), end='', file=perf_out)
+        perf_out.close()
 #    if args.disable_memory == False:
 #        mem_out = open(os.path.join(OUT_DIR, mem_out_file), 'w+')
     if args.disable_topic_words == False:
         topic_out = open(os.path.join(OUT_DIR, topic_out_file), 'w+')
-    return perf_out, mem_out, topic_out
+        topic_out.close()
 
 """ Runs LDA with given params num_passes times to measure performance """
-def runLDA_perf(params, num_passes, fout):
-    print("\n{0}, {1}, {2}".format(params['num_topics'], params['iterations'], params['workers']), end='', file=fout)
-    lda = None
-    for i in xrange(num_passes):
-        t0 = clock()
-        lda = models.ldamulticore.LdaMulticore(**params)
-        print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
-    print("Completed LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}".format(params['num_topics'], params['iterations'], params['workers']))
-    return lda
+def runLDA_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
+    with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
+        print("\n{0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        lda = None
+        for i in xrange(num_passes):
+            t0 = clock()
+            lda = models.ldamulticore.LdaMulticore(**params)
+            print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
+        print("Completed LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
+        return lda
+
+""" Run LDA mallet with given params num_passes times to measure performance """
+def runLDA_Mallet_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
+    with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
+        print("\n{0}, {1}, {2}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        lda = None
+        for i in xrange(num_passes):
+            t0 = clock()
+            lda = models.wrappers.LdaMallet(**params)
 
 @profile(stream=mem_out)      
 def runLDA_mem(params):
-    models.ldamulticore.LdaMulticore(**params)
+    lda = models.ldamulticore.LdaMulticore(**params)
+    return lda
 
 """ """
-def print_topics(topic_mat, params, num_words, fout):
-    print("\nTop {0} words of LDA model with params; num_topics:{1}, num_iterations:{2}, num_workers:{3}\n".format(num_words, params['num_topics'], params['iterations'], params['workers']), file=fout)
-    for topic_id, topic_words in topic_mat:
-        print("{0}. Topic id # {1}".format(topic_id+1, topic_id), end=' ', file=fout)
-        print([str(word) for i, (word, prob) in enumerate(topic_words)], file=fout)
+def print_topics(topic_mat, params, num_words, tf_idf, OUT_DIR, topic_out_file):
+    with open(os.path.join(OUT_DIR, topic_out_file), 'a') as fout:
+        print("\nTop {0} words of LDA model with params; num_topics:{1}, num_iterations:{2}, num_workers:{3}, tf-idf:{4}\n".format(num_words, params['num_topics'], params['iterations'], params['workers'], tf_idf), file=fout)
+        for topic_id, topic_words in topic_mat:
+            print("{0}. Topic id # {1}".format(topic_id+1, topic_id), end=' ', file=fout)
+            print([str(word) for i, (word, prob) in enumerate(topic_words)], file=fout)
 
 def iterate_arguments(param_grid):
     # Sort the keys of a dict for reproducibility
@@ -92,29 +109,61 @@ def run_benchmark():
     param_grid = {
     "num_topics" : [5, 10, 20, 30, 40],
     "iterations" : [50, 100, 300, 600, 1000],
-    "workers" : [None, 1, 2, 3, 4]
+    "workers" : [None, 1, 2, 3, 4],
+    "tf-idf" : [True, False]
     #TODO: set up for different implementations
 #    "implementation" : ["gensim", "mallet"]
     }
-    perf_out, mem_out, topic_out = setup_output_files(args, OUT_DIR)
+    cleanup_output_files(args, args.num_passes, OUT_DIR)
     if (args.disable_timing == False) and (args.disable_memory == False):
         for params in iterate_arguments(param_grid):
             print("Starting with params {0}".format(params))
-            params.update({'corpus' : corpus, 'id2word' : dictionary})
-            lda = runLDA_perf(params, args.num_passes, perf_out)
-            print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}\n".format(params['num_topics'], params['iterations'], params['workers']), file=mem_out)
+            params.update({'id2word' : dictionary})
+            if params['tf-idf']:
+                params.update({'corpus' : corpus_tfidf})
+            else :
+                params.update({'corpus' : corpus})
+            tf_idf = params.pop('tf-idf')
+            lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+            print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
             runLDA_mem(params)
             print("Completed")
-            topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
-            print_topics(topic_mat, params, args.num_words, topic_out)
-    elif args.disable_memory == True:
+            if (args.disable_topic_words == False):
+                topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
+                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+    elif (args.disable_memory == True) and (args.disable_timing == False):
         for params in iterate_arguments(param_grid):
             print("Starting with params {0}".format(params))
-            params.update({'corpus' : corpus, 'id2word' : dictionary})
-            lda = runLDA_perf(params, args.num_passes, perf_out)
+            params.update({'id2word' : dictionary})
+            if params['tf-idf']:
+                params.update({'corpus' : corpus_tfidf})
+            else :
+                params.update({'corpus' : corpus})
+            tf_idf = params.pop('tf-idf')
+            lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
             print("Completed")
-            topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
-            print_topics(topic_mat, params, args.num_words, topic_out)
-    
+            if (args.disable_topic_words == False):
+                topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
+                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+    elif (args.disable_timing == True) and (args.disable_memory == False):
+        for params in iterate_arguments(param_grid):
+            print("Starting with params {0}".format(params))
+            params.update({'id2word' : dictionary})
+            if params['tf-idf']:
+                params.update({'corpus' : corpus_tfidf})
+            else :
+                params.update({'corpus' : corpus})
+            tf_idf = params.pop('tf-idf')
+            lda = runLDA_mem(params)
+            print("Completed")
+            if (args.disable_topic_words == False):
+                topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
+                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+    else :
+        print("Nothing to do")
+    #close mem_out connection
+    mem_out.close()
+    print("Finished.")
+        
 if __name__ == "__main__":
     run_benchmark()
