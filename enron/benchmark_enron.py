@@ -10,12 +10,13 @@ from time import clock
 """ Code to benchmark gensim's LDA on enron email dataset """
 
 #Test dataset
-MODELS_DIR = "../../Data/models/mini_newsgroup"
+#MODELS_DIR = "../../Data/models/mini_newsgroup"
 #Actual dataset
-#MODELS_DIR = "../../Data/models/enron"
+MODELS_DIR = "../../Data/models/enron"
 OUT_DIR = "../../Data/out"
+MALLET_INSTALLATION_DIR = "../../mallet-2.0.8/bin/mallet" 
 
-topic_out_file = "topic_enron.rst"
+topic_out_file = "topic_enron.md"
 perf_out_file = "perf_enron.csv"
 mem_out_file = "mem_enron.txt"
 
@@ -41,7 +42,7 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
     if args.disable_timing == False:
         perf_out = open(os.path.join(OUT_DIR, perf_out_file), 'w+')
         #Print column header
-        print("num_topics, iterations, workers, tf-idf", end='', file=perf_out)
+        print("implementation, num_topics, iterations, workers, tf-idf", end='', file=perf_out)
         for i in xrange(num_passes):
             print(", pass_{0}".format(i), end='', file=perf_out)
         perf_out.close()
@@ -54,36 +55,45 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
 """ Runs LDA with given params num_passes times to measure performance """
 def runLDA_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
     with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
-        print("\n{0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        print("\nGensim, {0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
         lda = None
         for i in xrange(num_passes):
             t0 = clock()
             lda = models.ldamulticore.LdaMulticore(**params)
             print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
-        print("Completed LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
+        print("Completed LDA with params; implementation:Gensim, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
         return lda
 
 """ Run LDA mallet with given params num_passes times to measure performance """
 def runLDA_Mallet_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
     with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
-        print("\n{0}, {1}, {2}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        print("\nMallet, {0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
         lda = None
         for i in xrange(num_passes):
             t0 = clock()
             lda = models.wrappers.LdaMallet(**params)
+            print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
+        print("Completed LDA with params; implementation:Mallet, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
+        return lda
 
 @profile(stream=mem_out)      
 def runLDA_mem(params):
     lda = models.ldamulticore.LdaMulticore(**params)
     return lda
 
-""" """
-def print_topics(topic_mat, params, num_words, tf_idf, OUT_DIR, topic_out_file):
+@profile(stream=mem_out)      
+def runLDA_Mallet_mem(params):
+    lda = models.wrappers.LdaMallet(**params)
+    return lda
+    
+""" Print top num_words associated with each topic """
+def print_topics(topic_mat, params, num_words, tf_idf, implementation, OUT_DIR, topic_out_file):
     with open(os.path.join(OUT_DIR, topic_out_file), 'a') as fout:
-        print("\nTop {0} words of LDA model with params; num_topics:{1}, num_iterations:{2}, num_workers:{3}, tf-idf:{4}\n".format(num_words, params['num_topics'], params['iterations'], params['workers'], tf_idf), file=fout)
+        print("\nTop {0} words of LDA model with params; implementation:{1}, num_topics:{2}, num_iterations:{3}, num_workers:{4}, tf-idf:{5}\n".format(num_words, 
+        implementation, params['num_topics'], params['iterations'], params['workers'], tf_idf), file=fout)
         for topic_id, topic_words in topic_mat:
             print("{0}. Topic id # {1}".format(topic_id+1, topic_id), end=' ', file=fout)
-            print([str(word) for i, (word, prob) in enumerate(topic_words)], file=fout)
+            print([ str(word) for i, (word, prob) in enumerate(topic_words)], file=fout)
 
 def iterate_arguments(param_grid):
     # Sort the keys of a dict for reproducibility
@@ -109,10 +119,9 @@ def run_benchmark():
     param_grid = {
     "num_topics" : [5, 10, 20, 30, 40],
     "iterations" : [50, 100, 300, 600, 1000],
-    "workers" : [None, 1, 2, 3, 4],
-    "tf-idf" : [True, False]
-    #TODO: set up for different implementations
-#    "implementation" : ["gensim", "mallet"]
+    "workers" : [1, 2, 3, 4],
+    "tf-idf" : [True, False],
+    "implementation" : ["gensim", "mallet"]
     }
     cleanup_output_files(args, args.num_passes, OUT_DIR)
     if (args.disable_timing == False) and (args.disable_memory == False):
@@ -124,13 +133,21 @@ def run_benchmark():
             else :
                 params.update({'corpus' : corpus})
             tf_idf = params.pop('tf-idf')
-            lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
-            print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
-            runLDA_mem(params)
-            print("Completed")
+            implementation = params.pop('implementation')
+            if implementation == 'gensim':
+                lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
+                runLDA_mem(params)
+                print("Completed")
+            elif implementation == 'mallet':
+                params.update({"mallet_path" : MALLET_INSTALLATION_DIR})
+                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
+                runLDA_Mallet_mem(params)
+                print("Completed")
             if (args.disable_topic_words == False):
-                topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
-                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+                    topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
+                    print_topics(topic_mat, params, args.num_words, tf_idf, implementation, OUT_DIR, topic_out_file)
     elif (args.disable_memory == True) and (args.disable_timing == False):
         for params in iterate_arguments(param_grid):
             print("Starting with params {0}".format(params))
@@ -140,11 +157,16 @@ def run_benchmark():
             else :
                 params.update({'corpus' : corpus})
             tf_idf = params.pop('tf-idf')
-            lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+            implementation = params.pop('implementation')
+            if implementation == 'gensim':
+                lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+            elif implementation == 'mallet':
+                params.update({"mallet_path" : MALLET_INSTALLATION_DIR})
+                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
             print("Completed")
             if (args.disable_topic_words == False):
                 topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
-                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+                print_topics(topic_mat, params, args.num_words, tf_idf, implementation, OUT_DIR, topic_out_file)
     elif (args.disable_timing == True) and (args.disable_memory == False):
         for params in iterate_arguments(param_grid):
             print("Starting with params {0}".format(params))
@@ -154,11 +176,16 @@ def run_benchmark():
             else :
                 params.update({'corpus' : corpus})
             tf_idf = params.pop('tf-idf')
-            lda = runLDA_mem(params)
+            implementation = params.pop('implementation')
+            if implementation == 'gensim':
+                lda = runLDA_mem(params)
+            elif implementation == 'mallet':
+                params.update({"mallet_path" : MALLET_INSTALLATION_DIR})
+                runLDA_Mallet_mem(params)
             print("Completed")
             if (args.disable_topic_words == False):
                 topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
-                print_topics(topic_mat, params, args.num_words, tf_idf, OUT_DIR, topic_out_file)
+                print_topics(topic_mat, params, args.num_words, tf_idf, implementation, OUT_DIR, topic_out_file)
     else :
         print("Nothing to do")
     #close mem_out connection
