@@ -17,11 +17,10 @@ def runLDAMallet(params):
     print("done in {0:.3f} s".format((clock() - t0)))
     return lda
 
-def displayTopics(lda, num_topics):
-    for topic_id in xrange(num_topics):
-        topic = lda.show_topic(topicid=topic_id, num_words=20)
+def displayTopics(topic_mat):
+    for topic_id, topic_words in topic_mat:
         print("Topic id # {0}".format(topic_id))
-        print([str(word) for i, (word, prob) in enumerate(topic)])
+        print([str(word) for i, (word, prob) in enumerate(topic_words)])
 
 if __name__ == "__main__":
     dictionary = corpora.Dictionary.load(os.path.join(MODELS_DIR,'twentyNewsGroup.dict'))
@@ -36,4 +35,6 @@ if __name__ == "__main__":
     }
     lda = runLDAMallet(params)
     lda.save(os.path.join(MODELS_DIR, 'twentyNewsGroups.lda'))
-    displayTopics(lda, num_topics)
+    topic_mat = lda.show_topics(formatted=False,num_words = 20,num_topics=num_topics)
+    displayTopics(topic_mat)
+

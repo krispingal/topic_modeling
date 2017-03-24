@@ -20,14 +20,15 @@ There are a few things that I've observed about gensim's LDA behavior
 1. The execution timings for lda multicore, does not seem to go down as much as expected, by adding more workers to LDA.
 2. I am getting diferent output even after providing the same random state and input corpus to both LDA and HDP.
 
-### Requirements
+Requirements
+------------
 
-* Gensim
+* [Gensim][gensim]
 * Numpy
-* NLTK
+* [NLTK][nltk]
 * A BLAS/LAPACK library (optional)
-* Mallet (optional)
-* seaborn (optional)
+* [Mallet][mallet] (optional)
+* [seaborn][sns] (optional)
 
 [gensim]: https://radimrehurek.com/gensim/index.html
 [20_newsgroup]: https://archive.ics.uci.edu/ml/datasets/Twenty+Newsgroups
@@ -35,3 +36,6 @@ There are a few things that I've observed about gensim's LDA behavior
 [enron_kaggle]: https://www.kaggle.com/wcukierski/enron-email-dataset
 [kaggle]: https://www.kaggle.com/
 [enron]: https://www.cs.cmu.edu/~./enron/
+[nltk]: http://www.nltk.org/
+[mallet]: http://mallet.cs.umass.edu/
+[sns]: https://seaborn.pydata.org/index.html
