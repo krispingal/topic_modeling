@@ -10,9 +10,9 @@ from time import clock
 """ Code to benchmark gensim's LDA on enron email dataset """
 
 #Test dataset
-#MODELS_DIR = "../../Data/models/mini_newsgroup"
+MODELS_DIR = "../../Data/models/mini_newsgroup"
 #Actual dataset
-MODELS_DIR = "../../Data/models/enron"
+#MODELS_DIR = "../../Data/models/enron"
 OUT_DIR = "../../Data/out"
 MALLET_INSTALLATION_DIR = "../../mallet-2.0.8/bin/mallet" 
 
@@ -31,6 +31,7 @@ def parse_args():
     parser.add_argument("--disable_timing", help="Don't measure timing", action="store_true")
     parser.add_argument("--disable_memory", help="Don't measure memory usage", action="store_true")
     parser.add_argument("--disable_topic_words", help="Don't write out top n words", action="store_true")
+    parser.add_argument("--disable_coherence", help="Don't compute coherence of LDA model", action="store_true")
     parser.add_argument("-w", "--num_words", type=int, default=default_num_words, help="Number of top words to e displayed per topic")
     parser.add_argument("-p", "--num_passes", type=int, default=default_num_test_passes, help="Number of passes to measure timing")
     args = parser.parse_args()
@@ -45,6 +46,8 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
         print("implementation, num_topics, iterations, workers, tf-idf", end='', file=perf_out)
         for i in xrange(num_passes):
             print(", pass_{0}".format(i), end='', file=perf_out)
+        if args.disable_coherence == False:
+            print(", UMass_coherence", end='', file=perf_out)
         perf_out.close()
 #    if args.disable_memory == False:
 #        mem_out = open(os.path.join(OUT_DIR, mem_out_file), 'w+')
@@ -53,7 +56,7 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
         topic_out.close()
 
 """ Runs LDA with given params num_passes times to measure performance """
-def runLDA_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
+def runLDA_perf(params, num_passes, tf_idf, coherence, OUT_DIR, perf_out_file):
     with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
         print("\nGensim, {0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
         lda = None
@@ -61,6 +64,8 @@ def runLDA_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
             t0 = clock()
             lda = models.ldamulticore.LdaMulticore(**params)
             print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
+        cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
+        print(", {0}".format(cm.get_coherence()), end='', file=fout)
         print("Completed LDA with params; implementation:Gensim, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
         return lda
 
@@ -73,6 +78,8 @@ def runLDA_Mallet_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
             t0 = clock()
             lda = models.wrappers.LdaMallet(**params)
             print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
+        cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
+        print(", {0}".format(cm.get_coherence()), end='', file=fout)
         print("Completed LDA with params; implementation:Mallet, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
         return lda
 

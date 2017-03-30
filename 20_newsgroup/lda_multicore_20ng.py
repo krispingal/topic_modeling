@@ -4,7 +4,7 @@ from time import clock
 
 from gensim import corpora, models
 
-MODELS_DIR = "../Data/models/lda_multicore"
+MODELS_DIR = "../../Data/models/lda_multicore"
 #default # of recommended workers is # of cores-1 
 num_workers = 3
 num_topics = 6

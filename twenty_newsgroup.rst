@@ -49,7 +49,7 @@ The following is a sample document present in dataset: This was taken from topic
     
     I just got an Xpander from him - this guy knows how to pack 'em right.
 
-I have benchmarked gensim LDA on this corpus, which can be viewed here: https://github.com/krispingal/topic_modeling/blob/master/lda_benchmark.ipynb.
+I have benchmarked gensim LDA on this corpus, which can be viewed here: https://github.com/krispingal/topic_modeling/blob/master/20_newsgroup/lda_benchmark_20ng.ipynb .
 
 I get the following top 20 words for 6 topics, as output while running **gensim LDA** on 20-newsgroups for 6 topics *with tf-idf*.
 
@@ -71,12 +71,12 @@ and the following also from **gensim LDA**, but this time *without tf-idf* trans
 
 I get the following top 20 words for 6 topics, as output while running **gensim LDA mallet wrapper** on 20-newsgroups for 6 topics *with tf-idf*.
 
-1. Topic id # 0 ['good', 'r_z', 'uus', 'uuw', 'vrvrtv', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ystg', 'z_c_', 'uum']
-2. Topic id # 1 ['tesrt', 'uuw', 'uum', 'xgyu', 'r_z', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', 'z_c_', 'vrvrtv']
-3. Topic id # 2 ['satan', 'test', 'bullshit', 'ikh', 'uuw', 'vrvrtv', 'alyzfo', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', 'uus', 'z_c_']
-4. Topic id # 3 ['test', 'exit', 'r_z', 'uus', 'uuw', 'vrvrtv', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'z_c_', 'uum']
+1. Topic id # 0 ['good', 'r_z', 'uus', 'uuw', 'vrvrtv', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ystg', \'z_c_', 'uum']
+2. Topic id # 1 ['tesrt', 'uuw', 'uum', 'xgyu', 'r_z', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', \'z_c_', 'vrvrtv']
+3. Topic id # 2 ['satan', 'test', 'bullshit', 'ikh', 'uuw', 'vrvrtv', 'alyzfo', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', 'uus', \'z_c_']
+4. Topic id # 3 ['test', 'exit', 'r_z', 'uus', 'uuw', 'vrvrtv', 'alyzfo', 'ikh', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', \'z_c_', 'uum']
 5. Topic id # 4 ['unsubscribe', 'kidding', 'test', 'ignore', 'xgyu', 'ikh', 'alyzfo', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', 'vrvrtv', 'uum']
-6. Topic id # 5 ['ken', 'ikh', 'uus', 'uuw', 'vrvrtv', 'r_z', 'alyzfo', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', 'z_c_', 'uum']  
+6. Topic id # 5 ['ken', 'ikh', 'uus', 'uuw', 'vrvrtv', 'r_z', 'alyzfo', 'ikai', 'ikl', 'mwbel', \'uu_', 'cvi', 'pdz', 'azzq', 'hhpl', 'sty', 'wkx', 'ikj', \'z_c_', 'uum']  
 
 I get the following top 20 words for 6 topics, as output while running **gensim LDA mallet wrapper** on 20-newsgroups for 6 topics *without tf-idf*.
 
@@ -86,6 +86,9 @@ I get the following top 20 words for 6 topics, as output while running **gensim 
 4. Topic id # 3 ['year', 'game', 'space', 'time', 'good', 'team', 'years', 'back', 'play', 'games', 'nasa', 'ca', 'long', 'high', 'win', 'hockey', 'research', 'hit', 'players', 'season']
 5. Topic id # 4 ['people', 'government', 'state', 'law', 'gun', 'israel', 'time', 'rights', 'president', 'public', 'children', 'fbi', 'states', 'war', 'fire', 'today', 'jews', 'mr', 'make', 'years']
 6. Topic id # 5 ['system', 'windows', 'file', 'bit', 'mail', 'program', 'data', 'software', 'information', 'key', 'dos', 'computer', 'version', 'image', 'card', 'files', 'work', 'run', 'problem', 'graphics']
+
+Conclusion
+----------
 
 As you can notice there is significant difference between the one from gensim as well as the one from mallet.
 Running both library's LDA on same dataset I noticed:  

@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('-t', '--num_topics', type=int, default=default_num_topics, help='number of topics')
     parser.add_argument('-w', '--num_workers', type=int, default=default_num_workers, help='number of workers')
     parser.add_argument('-i', '--num_iterations', type=int, default=default_num_iterations, help='number of iterations')
+    parser.add_argument('--show_top_topics', action='store_true', help='display Umass topic coherence for each topic')
     args = parser.parse_args()
     return args
 
@@ -51,4 +52,8 @@ if __name__ == '__main__' :
     lda.save(os.path.join(MODELS_DIR, 'enron.lda'))
     topic_mat = lda.show_topics(formatted=False,num_words=num_words,num_topics=params['num_topics'])
     display_topics(topic_mat)
+    if args.show_top_topics:
+        lda.show_top_topics(corpus=corpus_tfidf, num_words=20)
+    cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=dictionary, coherence='u_mass')
+    print("UMass Coherence of model: {0}".format(cm.get_coherence()))
 
