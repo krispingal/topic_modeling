@@ -42,12 +42,12 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
     topic_out = None
     if args.disable_timing == False:
         perf_out = open(os.path.join(OUT_DIR, perf_out_file), 'w+')
-        #Print column header
-        print("implementation, num_topics, iterations, workers, tf-idf", end='', file=perf_out)
+        #Print column header, do not leave space in-between
+        print("implementation,num_topics,iterations,workers,tf-idf", end='', file=perf_out)
         for i in xrange(num_passes):
-            print(", pass_{0}".format(i), end='', file=perf_out)
+            print(",pass_{0}".format(i), end='', file=perf_out)
         if args.disable_coherence == False:
-            print(", UMass_coherence", end='', file=perf_out)
+            print(",UMass_coherence", end='', file=perf_out)
         perf_out.close()
 #    if args.disable_memory == False:
 #        mem_out = open(os.path.join(OUT_DIR, mem_out_file), 'w+')
@@ -58,28 +58,30 @@ def cleanup_output_files(args, num_passes, OUT_DIR):
 """ Runs LDA with given params num_passes times to measure performance """
 def runLDA_perf(params, num_passes, tf_idf, coherence, OUT_DIR, perf_out_file):
     with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
-        print("\nGensim, {0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        print("\nGensim,{0},{1},{2},{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
         lda = None
         for i in xrange(num_passes):
             t0 = clock()
             lda = models.ldamulticore.LdaMulticore(**params)
-            print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
-        cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
-        print(", {0}".format(cm.get_coherence()), end='', file=fout)
+            print(",{0:.3f}".format((clock() - t0)), end='', file=fout)
+        if coherence :
+            cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
+            print(",{0}".format(cm.get_coherence()), end='', file=fout)
         print("Completed LDA with params; implementation:Gensim, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
         return lda
 
 """ Run LDA mallet with given params num_passes times to measure performance """
-def runLDA_Mallet_perf(params, num_passes, tf_idf, OUT_DIR, perf_out_file):
+def runLDA_Mallet_perf(params, num_passes, tf_idf, coherence, OUT_DIR, perf_out_file):
     with open(os.path.join(OUT_DIR, perf_out_file), 'a') as fout:
-        print("\nMallet, {0}, {1}, {2}, {3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
+        print("\nMallet,{0},{1},{2},{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), end='', file=fout)
         lda = None
         for i in xrange(num_passes):
             t0 = clock()
             lda = models.wrappers.LdaMallet(**params)
-            print(", {0:.3f}".format((clock() - t0)), end='', file=fout)
-        cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
-        print(", {0}".format(cm.get_coherence()), end='', file=fout)
+            print(",{0:.3f}".format((clock() - t0)), end='', file=fout)
+        if coherence :
+            cm = models.CoherenceModel(model=lda, corpus=params['corpus'], dictionary=params['id2word'], coherence='u_mass')
+            print(", {0}".format(cm.get_coherence()), end='', file=fout)
         print("Completed LDA with params; implementation:Mallet, num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf:{3}".format(params['num_topics'], params['iterations'], params['workers'], tf_idf))
         return lda
 
@@ -130,6 +132,7 @@ def run_benchmark():
     "tf-idf" : [True, False],
     "implementation" : ["gensim", "mallet"]
     }
+    coherence = False if args.disable_coherence else True
     cleanup_output_files(args, args.num_passes, OUT_DIR)
     if (args.disable_timing == False) and (args.disable_memory == False):
         for params in iterate_arguments(param_grid):
@@ -142,13 +145,13 @@ def run_benchmark():
             tf_idf = params.pop('tf-idf')
             implementation = params.pop('implementation')
             if implementation == 'gensim':
-                lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                lda = runLDA_perf(params, args.num_passes, tf_idf, coherence, OUT_DIR, perf_out_file)
                 print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
                 runLDA_mem(params)
                 print("Completed")
             elif implementation == 'mallet':
                 params.update({"mallet_path" : MALLET_INSTALLATION_DIR})
-                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, coherence, OUT_DIR, perf_out_file)
                 print("Mem testing LDA with params; num_topics:{0}, num_iterations:{1}, num_workers:{2}, tf-idf{3}\n".format(params['num_topics'], params['iterations'], params['workers'], tf_idf), file=mem_out)
                 runLDA_Mallet_mem(params)
                 print("Completed")
@@ -166,10 +169,10 @@ def run_benchmark():
             tf_idf = params.pop('tf-idf')
             implementation = params.pop('implementation')
             if implementation == 'gensim':
-                lda = runLDA_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                lda = runLDA_perf(params, args.num_passes, tf_idf, coherence, OUT_DIR, perf_out_file)
             elif implementation == 'mallet':
                 params.update({"mallet_path" : MALLET_INSTALLATION_DIR})
-                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, OUT_DIR, perf_out_file)
+                lda = runLDA_Mallet_perf(params, args.num_passes, tf_idf, coherence, OUT_DIR, perf_out_file)
             print("Completed")
             if (args.disable_topic_words == False):
                 topic_mat = lda.show_topics(formatted=False,num_words=args.num_words,num_topics=params['num_topics'])
